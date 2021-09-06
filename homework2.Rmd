@@ -80,7 +80,7 @@ You have two objectives in this section:
 
 
 ```{r tidyweather}
-
+#hi
 ```
 
 Inspect your dataframe. It should have three variables now, one each for 
