@@ -76,11 +76,16 @@ You have two objectives in this section:
 
 1. Select the year and the twelve month variables from the `weather` dataset. We do not need the others (J-D, D-N, DJF, etc.) for this assignment. Hint: use `select()` function.
 
+
 1. Convert the dataframe from wide to 'long' format. Hint: use `gather()` or `pivot_longer()` function. Name the new dataframe as `tidyweather`, name the variable containing the name of the month as `month`, and the temperature deviation values as `delta`.
 
 
 ```{r tidyweather}
-#hi
+tidyweather <- weather %>% 
+  select(1:13) %>% 
+  pivot_longer(cols=2:13, 
+               names_to="Month", 
+               values_to = "delta")
 ```
 
 Inspect your dataframe. It should have three variables now, one each for 
@@ -198,18 +203,18 @@ ggplot(average_annual_anomaly, aes(x=year, y= annual_average_delta))+
 Your task is to construct a confidence interval for the average annual delta since 2011, both using a formula and using a bootstrap simulation with the `infer` package. Recall that the dataframe `comparison` has already grouped temperature anomalies according to time intervals; we are only interested in what is happening  between 2011-present.
 
 ```{r, calculate_CI_using_formula, eval=FALSE}
-
+set.seed(1234)
 formula_ci <- comparison %>% 
+  filter(interval == "2011-present") %>% 
+  specify(response = delta) %>%
+  generate(reps=1000,type = "bootstrap") %>%
+  calculate(stat = "mean")
 
-  # choose the interval 2011-present
-  # what dplyr verb will you use? 
-
-  # calculate summary statistics for temperature deviation (delta) 
-  # calculate mean, SD, count, SE, lower/upper 95% CI
-  # what dplyr verb will you use? 
-
+percentile_ci <- formula_ci %>%
+  get_ci(level = 0.95, type = "percentile")
 #print out formula_CI
 formula_ci
+
 ```
 
 
