@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "Final project"
 output: html_document
 ---
 
@@ -68,7 +68,7 @@ clean_data4 <- clean_data3 %>%
 
 clean_data <- clean_data4 %>% 
   mutate(country=countryname(country,'iso3c'))%>%
-  drop_na(country)s
+  drop_na(country)
 
 ```
 
