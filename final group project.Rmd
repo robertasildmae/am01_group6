@@ -14,9 +14,9 @@ library(car)
 library(ggfortify)
 ```
 
-```{}
+```{r}
 # use googlesheets4 to get data
-
+# bhjcfbdhferbvjrejrejruefbhje
 url <- "https://docs.google.com/spreadsheets/d/1IPS5dBSGtwYVbjsfbaMCYIWnOuRmJcbequohNxCyGVw/edit?resourcekey#gid=1625408792"
 googlesheets4::gs4_auth() # google sheets authorisation
 
@@ -68,14 +68,14 @@ clean_data4 <- clean_data3 %>%
 
 clean_data <- clean_data4 %>% 
   mutate(country=countryname(country,'iso3c'))%>%
+<<<<<<< HEAD
   drop_na(country) 
+=======
+  drop_na(country)
+>>>>>>> fb9a8ef442bb16cf5e250e9fa061c17f76f83c89
 
 ```
 
-
-## Including Plots
-
-You can also embed plots, for example:
 
 ```{r pressure, echo=FALSE}
 clean_data%>%
