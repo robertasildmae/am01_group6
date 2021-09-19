@@ -16,6 +16,7 @@ library(ggfortify)
 
 ```{r}
 # use googlesheets4 to get data
+
 # bhjcfbdhferbvjrejrejruefbhje
 url <- "https://docs.google.com/spreadsheets/d/1IPS5dBSGtwYVbjsfbaMCYIWnOuRmJcbequohNxCyGVw/edit?resourcekey#gid=1625408792"
 googlesheets4::gs4_auth() # google sheets authorisation
@@ -100,3 +101,9 @@ ppp_data4 <- ppp_data3 %>% select(LOCATION, Value)
 merge_data <- left_join(clean_data, ppp_data4, by = c('country' = 'LOCATION'))
 ppp_data<- merge_data %>% mutate(ppp_salary = total_salary / Value) %>% filter(!is.na(Value))
 ```
+
+
+```{r}
+
+```
+
