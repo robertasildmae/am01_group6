@@ -14,7 +14,7 @@ library(car)
 library(ggfortify)
 ```
 
-```{}
+```{r }
 # use googlesheets4 to get data
 
 url <- "https://docs.google.com/spreadsheets/d/1IPS5dBSGtwYVbjsfbaMCYIWnOuRmJcbequohNxCyGVw/edit?resourcekey#gid=1625408792"
