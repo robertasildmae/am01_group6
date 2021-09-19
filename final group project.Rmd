@@ -68,7 +68,7 @@ clean_data4 <- clean_data3 %>%
 
 clean_data <- clean_data4 %>% 
   mutate(country=countryname(country,'iso3c'))%>%
-  drop_na(country) %>% 
+  drop_na(country) 
 
 ```
 
@@ -102,5 +102,6 @@ ppp_data3<-ppp_data2[!(ppp_data2$LOCATION=="EU27_2020" | ppp_data2$LOCATION=="EA
 ```{r left join}
 ppp_data4 <- ppp_data3 %>% select(LOCATION, Value)
 merge_data <- left_join(clean_data, ppp_data4, by = c('country' = 'LOCATION'))
-ppp_data<- merge_data %>% mutate(ppp_salary = total_salary / Value) %>% filter(!is.na(Value))
+ppp_data<- merge_data %>% mutate(ppp_salary = total_salary / Value) %>% 
+filter(!is.na(Value))
 ```
