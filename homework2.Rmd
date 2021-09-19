@@ -47,6 +47,7 @@ library(vroom)
 
 # Climate change and temperature anomalies 
 
+Are these changes showing up peeps>
 
 If we wanted to study climate change, we can find data on the *Combined Land-Surface Air and Sea-Surface Water Temperature Anomalies* in the Northern Hemisphere at [NASA's Goddard Institute for Space Studies](https://data.giss.nasa.gov/gistemp). The [tabular data of temperature anomalies can be found here](https://data.giss.nasa.gov/gistemp/tabledata_v4/NH.Ts+dSST.txt)
 
@@ -80,8 +81,12 @@ You have two objectives in this section:
 
 
 ```{r tidyweather}
+<<<<<<< HEAD
 
 
+=======
+#hi
+>>>>>>> fee4fdcc6dd3f02f8884c3f6d60c1c5142d257ea
 ```
 
 Inspect your dataframe. It should have three variables now, one each for 
