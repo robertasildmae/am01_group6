@@ -68,14 +68,10 @@ clean_data4 <- clean_data3 %>%
 
 clean_data <- clean_data4 %>% 
   mutate(country=countryname(country,'iso3c'))%>%
-  drop_na(country) %>% 
+  drop_na(country)
 
 ```
 
-
-## Including Plots
-
-You can also embed plots, for example:
 
 ```{r pressure, echo=FALSE}
 clean_data%>%
