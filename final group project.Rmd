@@ -68,7 +68,7 @@ clean_data4 <- clean_data3 %>%
 
 clean_data <- clean_data4 %>% 
   mutate(country=countryname(country,'iso3c'))%>%
-  drop_na(country)
+  drop_na(country) %>% 
 
 ```
 
@@ -89,3 +89,13 @@ summarise(mean1=mean(USD_exchange))
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r ppp data}
+ppp_data1 <- read_csv(here::here("data","pppdata.csv"))
+
+ppp_data2 <- ppp_data1 %>% 
+  filter(TIME == "2020") 
+
+ppp_data3<-ppp_data2[!(ppp_data2$LOCATION=="EU27_2020" | ppp_data2$LOCATION=="EA19"),]
+ 
+```
+
