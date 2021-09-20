@@ -27,7 +27,7 @@ ask_a_manager_2021 <- googlesheets4::read_sheet(url) %>%
   janitor::clean_names()
 
 # if googlesheets is now working, read local copy
-ask_a_manager_2021 <- read_csv(here::here("data", "ask_a_manager_2021.csv"))
+# ask_a_manager_2021 <- read_csv(here::here("data", "ask_a_manager_2021.csv"))
 
 
 skimr::skim(ask_a_manager_2021)
@@ -39,6 +39,7 @@ skimr::skim(ask_a_manager_2021)
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
 
 ```{r cars}
 clean_data1 <- ask_a_manager_2021%>%
@@ -101,11 +102,44 @@ ppp_data3<-ppp_data2[!(ppp_data2$LOCATION=="EU27_2020" | ppp_data2$LOCATION=="EA
 ppp_data4 <- ppp_data3 %>% select(LOCATION, Value)
 merge_data <- left_join(clean_data, ppp_data4, by = c('country' = 'LOCATION'))
 ppp_data<- merge_data %>% mutate(ppp_salary = total_salary / Value) %>% filter(!is.na(Value))
+
+ppp_data %>%
+  drop_na(industry) %>%
+  group_by(industry) %>%
+  summarise(Freq = n()) %>%
+  ggplot(aes(x=fct_reorder(industry, Freq), y=Freq)) +
+  geom_bar(stat = "identity", fill = "cornflowerblue") +
+  geom_text(aes(label = Freq), position = position_dodge(width = 1), hjust = -0.2, size = 2) +
+  coord_flip() +
+  ylim(0, 3500) +
+  xlab("Industry") +
+  ylab("Responses") +
+  ggtitle("Responses by Industry") +
+  theme_bw()
 ```
 
 
 ```{r}
-model1 <- lm(ppp_salary ~ years_bank + gender , data=bank_salaries)
+model1 <- lm(ppp_salary ~ job_title + overall_years_of_professional_experience, data=ppp_data)
+model2 <- lm(ppp_salary ~ job_title + overall_years_of_professional_experience + years_of_experience_in_field , data=ppp_data)
+
+# model3 <- lm(ppp_salary ~ years_bank*gender, data=bank_salaries)
+
+
+mosaic::msummary(model1)
+mosaic::msummary(model2)
+```
+
+```{r}
+library(stringr)
+
+filter(ppp_data, str_detect(industry, "^Aca"))
+
+ppp_data5 <- ppp_data %>%
+  mutate(
+    industry_filtered = case_when(
+     str_detect(ppp_data$industry, "^Aca*") ~ "Academia")
+  )
 
 ```
 
