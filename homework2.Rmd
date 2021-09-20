@@ -82,11 +82,20 @@ You have two objectives in this section:
 
 
 ```{r tidyweather}
+<<<<<<< HEAD
+<<<<<<< HEAD
+
+
+=======
+#hi
+>>>>>>> fee4fdcc6dd3f02f8884c3f6d60c1c5142d257ea
+=======
 tidyweather <- weather %>% 
   select(1:13) %>% 
   pivot_longer(cols=2:13, 
                names_to="Month", 
                values_to = "delta")
+>>>>>>> 5ea3868c03ca894b5a842add1f76650d42226b95
 ```
 
 Inspect your dataframe. It should have three variables now, one each for 
