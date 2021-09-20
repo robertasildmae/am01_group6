@@ -71,11 +71,8 @@ clean_data4 <- clean_data3 %>%
 
 clean_data5 <- clean_data4 %>% 
   mutate(country=countryname(country,'iso3c'))%>%
-<<<<<<< HEAD
   drop_na(country) 
-=======
-  drop_na(country)
->>>>>>> fb9a8ef442bb16cf5e250e9fa061c17f76f83c89
+
 
 ```
 
@@ -106,10 +103,10 @@ ppp_data3<-ppp_data2[!(ppp_data2$LOCATION=="EU27_2020" | ppp_data2$LOCATION=="EA
 ```{r left join}
 ppp_data4 <- ppp_data3 %>% select(LOCATION, Value)
 merge_data <- left_join(clean_data, ppp_data4, by = c('country' = 'LOCATION'))
-<<<<<<< HEAD
+
 ppp_data<- merge_data %>% mutate(ppp_salary = total_salary / Value) %>% 
 filter(!is.na(Value))
-=======
+
 ppp_data<- merge_data %>% mutate(ppp_salary = total_salary / Value) %>% filter(!is.na(Value))
 
 ppp_data %>%
@@ -125,7 +122,7 @@ ppp_data %>%
   ylab("Responses") +
   ggtitle("Responses by Industry") +
   theme_bw()
->>>>>>> d3045def632985097e1e6f6144acfb9984b8b4f2
+
 ```
 
 
