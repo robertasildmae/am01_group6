@@ -14,10 +14,11 @@ library(car)
 library(ggfortify)
 ```
 
-```{r}
+
+```{r }
+
 # use googlesheets4 to get data
 
-# bhjcfbdhferbvjrejrejruefbhje
 url <- "https://docs.google.com/spreadsheets/d/1IPS5dBSGtwYVbjsfbaMCYIWnOuRmJcbequohNxCyGVw/edit?resourcekey#gid=1625408792"
 googlesheets4::gs4_auth() # google sheets authorisation
 
@@ -133,12 +134,21 @@ mosaic::msummary(model2)
 ```{r}
 library(stringr)
 
-filter(ppp_data, str_detect(industry, "^Aca"))
+filter(ppp_data, str_detect(industry, "Pharmaa*"))
+ppp_data %>% 
+  filter(str_detect(industry,"profa*")) 
+
+# str_view(ppp_data$industry,"^Edua*")
 
 ppp_data5 <- ppp_data %>%
   mutate(
-    industry_filtered = case_when(
-     str_detect(ppp_data$industry, "^Aca*") ~ "Academia")
+    industry_filtered= case_when(
+     str_detect(ppp_data$industry, "^Acaa*") ~ "Academia",
+     str_detect(ppp_data$industry, "pharmaa*") ~ "Pharmaceuticals",
+     str_detect(ppp_data$industry, "Pharmaa*") ~ "Pharmaceuticals",
+     str_detect(ppp_data$industry, "^Edua*") ~ "Education",
+     str_detect(ppp_data$industry, "^Accounta*") ~ "Accounting, Banking & Finance",
+    str_detect(ppp_data$industry, "profa*") ~ "Nonprofits")
   )
 
 ```
