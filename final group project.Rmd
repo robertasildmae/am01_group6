@@ -67,7 +67,7 @@ clean_data3 <- clean_data2 %>%
 clean_data4 <- clean_data3 %>% 
   mutate(USD_exchange = currencyCon(clean_data3$total_salary, clean_data3$currency, "USD"))
 
-clean_data <- clean_data4 %>% 
+clean_data5 <- clean_data4 %>% 
   mutate(country=countryname(country,'iso3c'))%>%
 <<<<<<< HEAD
   drop_na(country) 
@@ -79,13 +79,14 @@ clean_data <- clean_data4 %>%
 
 
 ```{r pressure, echo=FALSE}
-clean_data%>%
+clean_data <- clean_data5 %>% 
   filter(gender!="Non-binary")%>%
  filter(gender!="Other or prefer not to answer")%>%
-  filter(gender!="Prefer not to answer")%>%
+  filter(gender!="Prefer not to answer")
   
-group_by(gender, industry)%>%
-summarise(mean1=mean(USD_exchange))
+mean_clean <- clean_data %>% 
+  group_by(gender, industry)%>%
+  summarise(mean1=mean(USD_exchange))
 
 ```
 
@@ -109,6 +110,7 @@ filter(!is.na(Value))
 
 
 ```{r}
+model1 <- lm(ppp_salary ~ years_bank + gender , data=bank_salaries)
 
 ```
 
