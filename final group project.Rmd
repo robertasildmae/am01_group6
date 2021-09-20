@@ -109,19 +109,6 @@ filter(!is.na(Value))
 
 ppp_data<- merge_data %>% mutate(ppp_salary = total_salary / Value) %>% filter(!is.na(Value))
 
-ppp_data %>%
-  drop_na(industry) %>%
-  group_by(industry) %>%
-  summarise(Freq = n()) %>%
-  ggplot(aes(x=fct_reorder(industry, Freq), y=Freq)) +
-  geom_bar(stat = "identity", fill = "cornflowerblue") +
-  geom_text(aes(label = Freq), position = position_dodge(width = 1), hjust = -0.2, size = 2) +
-  coord_flip() +
-  ylim(0, 3500) +
-  xlab("Industry") +
-  ylab("Responses") +
-  ggtitle("Responses by Industry") +
-  theme_bw()
 
 ```
 
@@ -146,7 +133,20 @@ library(stringr)
 
 # str_view(ppp_data$industry,"^Edua*")
 
-ppp_data_industry <-  ppp_data %>% 
+ppp_data5 <- ppp_data %>%
+  mutate(
+    industry = case_when(
+     str_detect(ppp_data$industry, "^Acaa*") ~ "Academia",
+     str_detect(ppp_data$industry, "pharmaa*") ~ "Pharmaceuticals",
+     str_detect(ppp_data$industry, "Pharmaa*") ~ "Pharmaceuticals",
+     str_detect(ppp_data$industry, "^Accounta*") ~ "Accounting, Banking & Finance",
+    str_detect(ppp_data$industry, "profa*") ~ "Nonprofits",
+    TRUE ~ industry
+    )
+  )
+
+
+ppp_data_industry <-  ppp_data5 %>% 
   count(industry,sort=TRUE) %>% 
   mutate(percent=100* n/sum(n)) %>% 
   filter(percent>1)
@@ -155,20 +155,6 @@ ppp_industry <- ppp_data_industry$industry
 
 ppp_data_clean <- ppp_data %>% 
   filter(industry %in% ppp_industry)
-
-# ppp_data6 <- ppp_data5 %>%
-#   mutate(
-#     industry_filtered= case_when(
-#      str_detect(ppp_data$industry, "^Acaa*") ~ "Academia",
-#      str_detect(ppp_data$industry, "pharmaa*") ~ "Pharmaceuticals",
-#      str_detect(ppp_data$industry, "Pharmaa*") ~ "Pharmaceuticals",
-#      str_detect(ppp_data$industry, "^Edua*") ~ "Education",
-#      str_detect(ppp_data$industry, "^Accounta*") ~ "Accounting, Banking & Finance",
-#     str_detect(ppp_data$industry, "profa*") ~ "Nonprofits",
-#     TRUE ~ industry
-#     )
-#   )
-
 ```
 
 
@@ -184,9 +170,9 @@ ppp_data_clean %>%
   drop_na(industry) %>%
   group_by(industry) %>%
   summarise(Freq = n()) %>%
-  ggplot(aes(x=fct_reorder(industry, Freq), y=Freq)) +
-  geom_bar(stat = "identity", fill = "cornflowerblue") +
-  geom_text(aes(label = Freq), position = position_dodge(width = 1), hjust = -0.2, size = 2) +
+  ggplot(aes(fct_reorder(industry, Freq),Freq)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  geom_text(aes(label = Freq), position = position_dodge(width = 1), hjust = -0.2, size = 1.5) +
   coord_flip() +
   # ylim(0, 3500) +
   xlab("Industry") +
