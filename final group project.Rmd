@@ -114,17 +114,6 @@ ppp_data<- merge_data %>% mutate(ppp_salary = total_salary / Value) %>% filter(!
 
 
 ```{r}
-model1 <- lm(ppp_salary ~ job_title + overall_years_of_professional_experience, data=ppp_data)
-model2 <- lm(ppp_salary ~ job_title + overall_years_of_professional_experience + years_of_experience_in_field , data=ppp_data)
-
-# model3 <- lm(ppp_salary ~ years_bank*gender, data=bank_salaries)
-
-
-mosaic::msummary(model1)
-mosaic::msummary(model2)
-```
-
-```{r}
 library(stringr)
 # 
 # filter(ppp_data, str_detect(industry, "Pharmaa*"))
@@ -160,7 +149,6 @@ ppp_data_clean <- ppp_data %>%
 
 
 
-
 # Plot
 
 
@@ -179,6 +167,40 @@ ppp_data_clean %>%
   ylab("Counts") +
   ggtitle("Responses by Industry") +
   theme_bw()
+
+```
+
+# Regression
+
+For our regression analysis, we are predicting the 
+```{r Regression}
+ppp_data_clean <- ppp_data_clean %>% 
+  drop_na(USD_exchange, highest_level_of_education_completed)
+
+
+ppp_reg <- ppp_data_clean %>% 
+  filter(country== "USA")
+
+model1  <- lm(total_salary ~ industry, data=ppp_reg)
+mosaic::msummary(model1)
+
+model2  <- lm(total_salary ~ industry + years_of_experience_in_field , data=ppp_reg)
+mosaic::msummary(model2)
+
+model3 <- lm(total_salary ~ industry + years_of_experience_in_field + highest_level_of_education_completed, data=ppp_reg)
+mosaic::msummary(model3)
+
+model4 <- lm(total_salary ~ industry + years_of_experience_in_field + highest_level_of_education_completed + gender, data=ppp_reg)
+mosaic::msummary(model4)
+
+model5 <- lm(total_salary ~ industry + years_of_experience_in_field + highest_level_of_education_completed + gender, data=ppp_reg)
+mosaic::msummary(model5)
+
+model6 <- lm(total_salary ~ industry + years_of_experience_in_field + highest_level_of_education_completed + gender+ overall_years_of_professional_experience, data=ppp_reg)
+mosaic::msummary(model6)
+
+huxtable::huxreg(model1, model2, model3, model4, model5, model6)
+
 
 ```
 
