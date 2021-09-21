@@ -1,5 +1,6 @@
 ---
-title: "Final project"
+title: "Final project: Ask a Manager Analysis"
+subtitle: "Study Group 6"
 output: html_document
 ---
 
@@ -31,16 +32,9 @@ ask_a_manager_2021 <- googlesheets4::read_sheet(url) %>%
 # if googlesheets is now working, read local copy
 # ask_a_manager_2021 <- read_csv(here::here("data", "ask_a_manager_2021.csv"))
 
-
-
 ```
 
 ## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
 
 ```{r cars}
 clean_data1 <- ask_a_manager_2021%>%
@@ -136,7 +130,6 @@ ppp_data5 <- ppp_data %>%
     )
   )
 
-
 ppp_data_industry <-  ppp_data5 %>% 
   count(industry,sort=TRUE) %>% 
   mutate(percent=100* n/sum(n)) %>% 
@@ -150,11 +143,9 @@ ppp_data_clean <- ppp_data %>%
 ```
 
 
-
-
 # Plot
 
-To begin with our analysis, we will look at the number of responses with the 
+To begin with our analysis, we will look at the number of responses by industry and focus on the ones with the most responses to ensure that the dataset is significant enough to make relevant conclusions.   
 
 ```{r introductory ppp analysis}
 
@@ -167,7 +158,7 @@ ppp_data_clean %>%
   geom_text(aes(label = Freq), position = position_dodge(width = 1), hjust = -0.2, size = 1.5) +
   coord_flip() +
   xlab("Industry") +
-  ylab("Counts") +
+  ylab("Number of responses") +
   ggtitle("Responses by Industry") +
   theme_bw()
 
@@ -180,13 +171,18 @@ ppp_data_clean %>%
   group_by(industry) %>% 
   ggplot(aes(x=ppp_salary,y=industry,color=gender))+
   # facet_wrap(gender~.)+
-  geom_point()+
+  geom_point(alpha=0.2)+
   scale_color_manual(values = c("Man" = "blue", "Woman" = "red"))+
+  labs(title = "Purchasing Power Parity Salary by Industry",
+       subtitle = "Split by Gender",
+       y= "Industry",
+       x= "Purchasing Power Parity related Salary",
+       colour= "Gender")+
   xlim(0, 500000) 
 
-
 ```
-
+We look at the purchasing power parity salary to have a ground for comparison when looking at all countries, as a $1 in one country is not worth as much in another. 
+The industry with the most respondents, Computing/Tech, seems to be heavily male-dominated, especially when looking at the higher salaries. 
 ```{r average gender gap}
 
 # Average gender gap in the US by industry
