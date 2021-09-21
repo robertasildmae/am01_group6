@@ -361,40 +361,41 @@ ppp_data_final_clean <- ppp_data_clean %>%
 
 # Regression
 
-For our regression analysis, we are predicting the 
+For our regression analysis, we are aiming to predict the total salary (annual salary and  other monnetary compensation) for the USA,  as this country has the highest number of observations and we are attempting to achieve a higher model accuracy. 
 ```{r Regression}
-# ppp_data_final_clean <- ppp_data_clean %>% 
-#   drop_na(USD_exchange, highest_level_of_education_completed)
-
-
 ppp_reg <- ppp_data_final_clean %>% 
   filter(country== "USA")
 
 model1  <- lm(total_salary ~ industry, data=ppp_reg)
 mosaic::msummary(model1)
+confint(model1)
 
 model2  <- lm(total_salary ~ industry + years_of_experience_in_field , data=ppp_reg)
 mosaic::msummary(model2)
+confint(model2)
 
 model3 <- lm(total_salary ~ industry + years_of_experience_in_field + highest_level_of_education_completed, data=ppp_reg)
 mosaic::msummary(model3)
+confint(model3)
 
 model4 <- lm(total_salary ~ industry + years_of_experience_in_field + highest_level_of_education_completed + gender, data=ppp_reg)
 mosaic::msummary(model4)
+confint(model4)
 
-model5 <- lm(total_salary ~ industry + years_of_experience_in_field + highest_level_of_education_completed + gender, data=ppp_reg)
+model5 <- lm(total_salary ~ industry + years_of_experience_in_field + highest_level_of_education_completed + gender+ overall_years_of_professional_experience, data=ppp_reg)
 mosaic::msummary(model5)
+confint(model5)
 
-model6 <- lm(total_salary ~ industry + years_of_experience_in_field + highest_level_of_education_completed + gender+ overall_years_of_professional_experience, data=ppp_reg)
+model6 <- lm(total_salary ~ industry + years_of_experience_in_field + highest_level_of_education_completed + gender+ overall_years_of_professional_experience + race_filtered , data=ppp_reg)
 mosaic::msummary(model6)
-
-model7 <- lm(total_salary ~ industry + years_of_experience_in_field + highest_level_of_education_completed + gender+ overall_years_of_professional_experience + race_filtered , data=ppp_reg)
-mosaic::msummary(model7)
+confint(model6)
 
 
 huxtable::huxreg(model1, model2, model3, model4, model5, model6)
-
-
 ```
+ To begin with, we run a linear regression model while only including the variable industry which we have cleaned to only include the top 20 industries in our dataframe (which all account for more than 1% of observations in our dataframe). Upon running the regression, we achieve an R squared of 10.33% which means that the predictor variable industry explains 10.33% of our dependent/response variable "total_salary". We can also look at the residual standard error to evaluate how well the linear regression model fits the data. This measure  shows the average amount that the real values of total salary differ from the predictions our regression line provides. Our residual standard error  of 88340 indicates that on average the actual total salary of a person in the US deviates from our regression line by  approximately 88340  dollars. While looking at our regression table, we can distinguish which variables are statistically significant by looking at the p-value and the indication of stars after the variables. Furthermore, the t-value shows how many standard deviations out coefficient estimate is situated compared to 0. If our t-stat is more than 2, it is a strong indication that we can reject the null hypothesis (there is no salary difference between different industries) and indicate a relationship  between the two variables. As  we can see, our model indicates that most industries are statistically significant in terms of  our model, showcased by for example the variable 'industryComputing or Tech'  with a p-value smaller than 0.01, indicating that someone in the Computing or Tech industry would earn on average 47767.5 dollars more than someone in the 'control' industry which is Accounting, Banking & Finance while someone in the Art & Design  industry would earn on average 17613.1 dollars less than someone in Accounting, Banking & Finance. However, for the Engineering or Manufacturing industry we observe a t-value of less than 2 and a large p-value of 0.84, indicating no statistical significance that there is a difference between the total salary for a person in Accounting, Banking & Finance and Engineering or Manufacturing. The intercept of 108566.2 dollars indicates the total  salary with no industry. Furthermore, we can analyse the 95% confidence interval for each industry to see where 95% of the predicted total salary observations lie in terms of the baseline. For example, for the Computing or Tech industry 95% of total salaries  differ from the baseline industry Accounting, Banking & Finance's total salary in the range of 42126.9402 to 53408.067.
+All in all,  our simplistic model 1 is not very good at predicting total salary, meaning that we should add other variables to increase accuracy. Consequently, the R squared will increase while running a multiple regression, as more variables are included in the  model. The adjusted R squared solves this problem by adjusting for the number of considered variables.
 
+Our models 2-5 consecutively add other variables to the model: years of experience in field, highest level of education completed, gender and overall years of professional experience. With each addition the R squared measure increases, indicating that our model is explaining more of the dependent variable total salary. While adding new variables, our model follows the same logic as described above. For years of experience in field all of the variables are statistically significant for our model while compared the baseline of 1 year or less. The salary increase goes up with the amount of years in industry. In model 3, highest level of education completed has the baseline of College education with all other variables being statistically significant, and  each degree at a lower level than college earning less and each degree at a higher level earning more than a college educated person average, while controlling for the other variable categories in our model. Model 4 has male as a baseline with woman being statistically significant, indicating that women earn on average 26779 dollars less than men while controlling for other variables. Model 5 also incorporates overall years of professional experience, for which only two variables are statistically significant, meaning that the category is not very good for explaining the differences in total salary. This is also supported by a comparison of th R squared measures for model 4 and 5 (seen in the table comparison of regression model results), as the R squared only increases from 19% to 19.1%. 
 
+Finally, we derive our final model 6 which incorporates years of experience in field, highest level of education completed, gender and overall years of professional experience and gender. This model achieves an R squared of 19.3%, showing that our model variables explain 19.3% of the dependent variable total salary. Race is deemed statistically significant at the 0.01 p-value, showing that white people on earn on average -12532.0 dollars less than people we have grouped as non-white. It is important to note that in our data cleaning process, race originally had 44 diffrent input variables and grouping these to only 3 (white, non-white and prefer not to say) influences our prediction results. A
