@@ -31,7 +31,6 @@ ask_a_manager_2021 <- googlesheets4::read_sheet(url) %>%
 # ask_a_manager_2021 <- read_csv(here::here("data", "ask_a_manager_2021.csv"))
 
 
-skimr::skim(ask_a_manager_2021)
 
 ```
 
