@@ -109,7 +109,6 @@ filter(!is.na(Value))
 
 ppp_data<- merge_data %>% mutate(ppp_salary = total_salary / Value) %>% filter(!is.na(Value))
 
-
 ```
 
 
@@ -155,6 +154,7 @@ ppp_industry <- ppp_data_industry$industry
 
 ppp_data_clean <- ppp_data %>% 
   filter(industry %in% ppp_industry)
+
 ```
 
 
@@ -164,7 +164,7 @@ ppp_data_clean <- ppp_data %>%
 # Plot
 
 
-```{r}
+```{r introductory ppp analysis}
 
 ppp_data_clean %>%
   drop_na(industry) %>%
@@ -179,6 +179,20 @@ ppp_data_clean %>%
   ylab("Counts") +
   ggtitle("Responses by Industry") +
   theme_bw()
+
+# ggplot(ppp_data_clean, aes(x=ppp_salary))+
+# geom_point()
+```
+
+```{r}
+ppp_data_clean %>% 
+  group_by(industry) %>% 
+  ggplot(aes(x=ppp_salary,y=industry,color=gender))+
+  # facet_wrap(gender~.)+
+  geom_point()+
+  scale_color_manual(values = c("Man" = "blue", "Woman" = "red"))+
+  xlim(0, 500000) 
+
 
 ```
 
