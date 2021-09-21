@@ -338,15 +338,36 @@ ppp_data_clean %>%
 
 ```
 
+We will now clean our race column. If we run a the `unique` function in r on the race column we see that there are 44 different categories. We will separate the race into white, non white and unanswered.
+
+We then take out the Not Answered values as can be seen in the code below. 
+
+```{r}
+
+ppp_data_final_clean <- ppp_data_clean %>%
+  drop_na(race, USD_exchange, highest_level_of_education_completed) %>% 
+  mutate(
+    race_filtered = case_when(
+    str_detect(race, "^Whitea*") ~ "White",
+    str_detect(race, "Another option not listed here or prefer not to answer*") ~ "Not Answered",
+    TRUE ~ "Non White"
+    )
+  ) %>% 
+  filter(!race_filtered=="Not Answered")
+
+
+
+```
+
 # Regression
 
 For our regression analysis, we are predicting the 
 ```{r Regression}
-ppp_data_clean <- ppp_data_clean %>% 
-  drop_na(USD_exchange, highest_level_of_education_completed)
+# ppp_data_final_clean <- ppp_data_clean %>% 
+#   drop_na(USD_exchange, highest_level_of_education_completed)
 
 
-ppp_reg <- ppp_data_clean %>% 
+ppp_reg <- ppp_data_final_clean %>% 
   filter(country== "USA")
 
 model1  <- lm(total_salary ~ industry, data=ppp_reg)
@@ -367,29 +388,13 @@ mosaic::msummary(model5)
 model6 <- lm(total_salary ~ industry + years_of_experience_in_field + highest_level_of_education_completed + gender+ overall_years_of_professional_experience, data=ppp_reg)
 mosaic::msummary(model6)
 
+model7 <- lm(total_salary ~ industry + years_of_experience_in_field + highest_level_of_education_completed + gender+ overall_years_of_professional_experience + race_filtered , data=ppp_reg)
+mosaic::msummary(model7)
+
+
 huxtable::huxreg(model1, model2, model3, model4, model5, model6)
 
 
 ```
 
-We will now clean our race column. If we run a the `unique` function in r on the race column we see that there are 44 different categories. We will separate the race into white, non white and unanswered.
-
-We then take out the Not Answered values as can be seen in the code below. 
-
-```{r}
-
-ppp_data_final_clean <- ppp_data_clean %>%
-  drop_na(race) %>% 
-  mutate(
-    race_filtered = case_when(
-    str_detect(race, "^Whitea*") ~ "White",
-    str_detect(race, "Another option not listed here or prefer not to answer*") ~ "Not Answered",
-    TRUE ~ "Non White"
-    )
-  ) %>% 
-  filter(!race_filtered=="Not Answered")
-
-
-
-```
 
