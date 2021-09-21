@@ -210,6 +210,7 @@ ppp_data_clean %>%
 # ggplot(ppp_data_clean, aes(x=ppp_salary))+
 # geom_point()
 ```
+
 We first note that 16% of the respondents are part of the Tech industry, and we can infer that it is one of the most popular industries; however, it should be noted that it also may just be that people in the tech and computing industry are more likely to respond to the "Ask a Manager" survey. Education and non-profits each stand for 8% of the survey entries, being among the most popular industries with the most observations.    
 
 ## a. Purchasing Power Parity adjusted Salary 
@@ -274,6 +275,7 @@ plot7%>%
 
 
 ```
+
 On average, salaries worldwide fluctuate between $63,000 and $85,000, with Switzerland, Ireland and the USA having the highest average purchasing power adjusted salaries and India, South Africa and Spain having the lowest. 
 
 ```{r}
@@ -291,36 +293,11 @@ ppp_data_clean %>%
   xlim(0, 500000) 
 
 ```
+
 Looking at the PPP adjusted salary for each industry, split by gender, seems to indicate a salary gap between genders, with men having higher salaries than woman in most industries. For instance, the industry with the most observations - Tech - seems to be overall heavily men-dominated, especially when looking at the right-hand side of the figure indicating that they also have higher salaries. This is not a surprising finding as studies show that there is less women then men in STEM, as there is a known "STEM gap" and social bias discourage women for pursuing careers in this field. 
 We will investigate the gender gap in each industry for the United States in the next portion of our analysis.
 
 ## b. Focus on the United States  
-
-### Average salary in the US by Industry
-
-```{r}
-# Average Salary in the US by industry
-
-plot3<-plot1%>%
-  select(industry,ppp_salary)%>%
-group_by(industry)%>%
-summarise(mean1=mean(ppp_salary))
-  
-  plot3%>%
-  ggplot(aes(x=mean1,y=reorder(industry, mean1),group=1,fill = mean1))+
-  geom_histogram(stat='identity')+
-  labs(title = "Average Salary in the US by Industry",
-       x="Average Salary (US $)",
-       y= "Industry",
-       fill= "Average")+
-   theme(axis.text=element_text(size=8),
-        axis.title=element_text(size=10),
-        axis.text.x = element_blank()) +
-    theme_bw()
-  
-```
-The United States highest paying industries are the ones we would assume, with Tech, Law and Sales having the highest salaries. Those industries having a reputation of being male-dominated - especially tech and sales - in the United States, it will be interesting to investigate the gender differences in salaries. 
-
 ### Gender Gaps in the US 
 
 ```{r average gender gap}
@@ -358,7 +335,35 @@ plot%>%
   theme_bw()
   
 ```
+
 The above figure confirms our inferences. Finance, Tech and Law present the biggest average pay gaps, of over $45,000. They are also industries having a higher average salary than others, as we saw in the precedent figure, which could partly explain why the difference is so significant. Another reason for these large gaps is that top executives in those companies are mostly men, and studies show that people tend to promote others similar to them, making it harder for women to "break the glass ceilling".
+
+### Average salary in the US by Industry
+
+```{r}
+# Average Salary in the US by industry
+
+plot3<-plot1%>%
+  select(industry,ppp_salary)%>%
+group_by(industry)%>%
+summarise(mean1=mean(ppp_salary))
+  
+  plot3%>%
+  ggplot(aes(x=mean1,y=reorder(industry, mean1),group=1,fill = mean1))+
+  geom_histogram(stat='identity')+
+  labs(title = "Average Salary in the US by Industry",
+       x="Average Salary (US $)",
+       y= "Industry",
+       fill= "Average")+
+   theme(axis.text=element_text(size=8),
+        axis.title=element_text(size=10),
+        axis.text.x = element_blank()) +
+    theme_bw()
+  
+```
+
+The United States highest paying industries are the ones we would assume, with Tech, Law and Sales having the highest salaries. Those industries having a reputation of being male-dominated - especially tech and sales - in the United States, it will be interesting to investigate the gender differences in salaries. 
+
 
 ### Race salary gaps in the US
 
@@ -391,6 +396,7 @@ plotr%>%
   theme_bw()
   
 ```
+
 Based on our initial assumptions,  public statistics and known political climate, we would assume that the salary gap in the US would benefit white people and disadvantage "non-white" people. However, as there were over 44 different race entries in the dataset, which we simplified to "non-white" and "white", it looks as if people belonging to the stricly "white" category make less money on average than people who do not. This is not an extremely accurate conclusion as we would need to drill into a better classification of races to produce more relevant findings. Yet, this should be kept in mind when trying to predict salaries accurately with linear regression. 
 
 ### Average salary in the US by education level
@@ -419,6 +425,7 @@ plot4 %>%
 
 
 ```
+
 The US having especially high tuitions fees, we expected the salaries to justify the cost of studying; with professional degrees earning on average $10,000 than Americans with only a high school diploma, it seems that education level is an influencing factor on average salary in the United States.
 
 
@@ -456,6 +463,7 @@ confint(model6)
 
 huxtable::huxreg(model1, model2, model3, model4, model5, model6)
 ```
+
 To begin with, we run a linear regression model while only including the variable industry which we have cleaned to only include the top 20 industries in our dataframe (which all account for more than 1% of observations in our dataframe). Upon running the regression, we achieve an R squared of 10.33% which means that the predictor variable industry explains 10.33% of our dependent/response variable "total_salary". We can also look at the residual standard error to evaluate how well the linear regression model fits the data. This measure  shows the average amount that the real values of total salary differ from the predictions our regression line provides. Our residual standard error  of 88340 indicates that on average the actual total salary of a person in the US deviates from our regression line by approximately 88340  dollars. While looking at our regression table, we can distinguish which variables are statistically significant by looking at the p-value and the indication of stars after the variables. Furthermore, the t-value shows how many standard deviations out coefficient estimate is situated compared to 0. If our t-stat is more than 2, it is a strong indication that we can reject the null hypothesis (there is no salary difference between different industries) and indicate a relationship  between the two variables. As  we can see, our model indicates that most industries are statistically significant in terms of  our model, showcased by for example the variable 'industryComputing or Tech'  with a p-value smaller than 0.01, indicating that someone in the Computing or Tech industry would earn on average 47767.5 dollars more than someone in the 'control' industry which is Accounting, Banking & Finance while someone in the Art & Design  industry would earn on average 17613.1 dollars less than someone in Accounting, Banking & Finance. However, for the Engineering or Manufacturing industry we observe a t-value of less than 2 and a large p-value of 0.84, indicating no statistical significance that there is a difference between the total salary for a person in Accounting, Banking & Finance and Engineering or Manufacturing. The intercept of 108566.2 dollars indicates the total  salary with no industry. Furthermore, we can analyse the 95% confidence interval for each industry to see where 95% of the predicted total salary observations lie in terms of the baseline. For example, for the Computing or Tech industry 95% of total salaries  differ from the baseline industry Accounting, Banking & Finance's total salary in the range of 42126.9402 to 53408.067.
 All in all,  our simplistic model 1 is not very good at predicting total salary, meaning that we should add other variables to increase accuracy. Consequently, the R squared will increase while running a multiple regression, as more variables are included in the  model. The adjusted R squared solves this problem by adjusting for the number of considered variables.
 
