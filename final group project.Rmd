@@ -12,6 +12,7 @@ library(countrycode) # to clean up country names
 library(broom)
 library(car)
 library(ggfortify)
+
 ```
 
 
@@ -270,6 +271,7 @@ plot4 %>%
 ```{r}
 
 #Average ppp_salary worldwide by industry
+library(scales)
 
 plot5<-ppp_data_clean%>%
   select(industry,country,ppp_salary)%>%
@@ -301,7 +303,8 @@ plot7 <- left_join(plot6, gdp_list, by = "country")
 plot7%>%
     ggplot(aes(x=reorder(country, gdp),y=mean3,group=1,color=industry))+
   geom_point()+
-  geom_smooth()+
+  geom_smooth(method=lm)+
+  scale_y_continuous(labels = dollar)+
   labs(title = "Average ppp_salary distribution by industry and country",
        x="Country",
        y= "Average ppp_salary")+
@@ -313,7 +316,7 @@ plot7%>%
 plot7%>%
     ggplot(aes(x=reorder(country, gdp),y=mean3,group=1,color=industry))+
   #geom_point()+
-  geom_smooth()+
+  geom_smooth(method = lm)+
   labs(title = "Average ppp_salary distribution by industry and country",
        x="Country",
        y= "Average ppp_salary")+
