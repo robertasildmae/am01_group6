@@ -4,6 +4,25 @@ subtitle: "Study Group 6"
 output: html_document
 ---
 
+# Introduction
+
+In this report, we will be looking at the "Ask a Manager" 2021 survey and focusing on the influencing factors of salaries.
+
+# Table of contents
+
+## I. Cleaning the dataset
+  a.Salary
+  b.Gender
+  c. Purchase Power Parity (PPP)
+  d.Industries
+  e. Race
+  
+## II. Analysis of Salaries 
+  a. Purchasing Power Parity adjusted Salary 
+  b. Focus on the United States
+  
+## III. Linear Regression Models
+ 
 ```{r setup, include=FALSE}
 library(googlesheets4)
 library(tidyverse)
@@ -15,7 +34,6 @@ library(car)
 library(ggfortify)
 
 ```
-
 
 ```{r }
 
@@ -29,12 +47,12 @@ googlesheets4::gs4_auth() # google sheets authorisation
 ask_a_manager_2021 <- googlesheets4::read_sheet(url) %>% 
   janitor::clean_names()
 
-# if googlesheets is now working, read local copy
-# ask_a_manager_2021 <- read_csv(here::here("data", "ask_a_manager_2021.csv"))
-
 ```
 
-## R Markdown
+# I. Cleaning the Data
+
+## a. Salary
+For the sake of simplicity, we first bring together all monetary compensations: base salaries and "other monetary compensations" - simply put, bonuses. We then convert all currencies to USD, to have a ground for comparison.
 
 ```{r cars}
 clean_data1 <- ask_a_manager_2021%>%
@@ -67,9 +85,10 @@ clean_data5 <- clean_data4 %>%
   mutate(country=countryname(country,'iso3c'))%>%
   drop_na(country) 
 
-
 ```
 
+## b. Gender
+To be able to look at one's gender's impact on salaries, we only select two genders: "male" and "female" as there are not enough observations for the others to be statiscally relevant in this particular analysis.  
 
 ```{r pressure, echo=FALSE}
 clean_data <- clean_data5 %>% 
@@ -84,6 +103,7 @@ mean_clean <- clean_data %>%
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
 ```{r ppp data}
 ppp_data1 <- read_csv(here::here("data","pppdata.csv"))
 
@@ -94,8 +114,12 @@ ppp_data3<-ppp_data2[!(ppp_data2$LOCATION=="EU27_2020" | ppp_data2$LOCATION=="EA
  
 ```
 
+## c. Purchase Power Parity 
+We then join the purchase power parity (PPP) data to our dataset and create a new value, "PPP Salary". We look at the purchasing power parity adjusted salary to have a ground for comparison when looking at all countries, as $1 in one country is not worth as much in another.
+
 ```{r left join}
-ppp_data4 <- ppp_data3 %>% select(LOCATION, Value)
+ppp_data4 <- ppp_data3 %>% 
+  select(LOCATION, Value)
 merge_data <- left_join(clean_data, ppp_data4, by = c('country' = 'LOCATION'))
 
 ppp_data<- merge_data %>% 
@@ -108,6 +132,8 @@ ppp_data<- merge_data %>%
 
 ```
 
+## d. Industries 
+We create new industries attribution, as the survey's respondents phrased their industries in many different ways. We then filter out industries for which there was not enough observations.
 
 ```{r}
 library(stringr)
@@ -142,10 +168,29 @@ ppp_data_clean <- ppp_data %>%
 
 ```
 
+## e. Race
+We will now clean our race column. If we run a `unique` function in r on the race column we see that there are 44 different categories. We will separate the races into white, non white and unanswered.
+We then take out the Not Answered values as can be seen in the code below. 
 
-# Plot
+```{r}
 
-To begin with our analysis, we will look at the number of responses by industry and focus on the ones with the most responses to ensure that the dataset is significant enough to make relevant conclusions.   
+ppp_data_final_clean <- ppp_data_clean %>%
+  drop_na(race, USD_exchange, highest_level_of_education_completed) %>% 
+  mutate(
+    race_filtered = case_when(
+    str_detect(race, "^Whitea*") ~ "White",
+    str_detect(race, "Another option not listed here or prefer not to answer*") ~ "Not Answered",
+    TRUE ~ "Non White"
+    )
+  ) %>% 
+  filter(!race_filtered=="Not Answered")
+
+```
+
+
+# II. Analysis of salary differences 
+
+To begin with our analysis, we will look at the number of responses by industries.
 
 ```{r introductory ppp analysis}
 
@@ -165,104 +210,11 @@ ppp_data_clean %>%
 # ggplot(ppp_data_clean, aes(x=ppp_salary))+
 # geom_point()
 ```
+We first note that 16% of the respondents are part of the Tech industry, and we can infer that it is one of the most popular industries; however, it should be noted that it also may just be that people in the tech and computing industry are more likely to respond to the "Ask a Manager" survey. Education and non-profits each stand for 8% of the survey entries, being among the most popular industries with the most observations.    
 
-```{r}
-ppp_data_clean %>% 
-  group_by(industry) %>% 
-  ggplot(aes(x=ppp_salary,y=industry,color=gender))+
-  # facet_wrap(gender~.)+
-  geom_point(alpha=0.2)+
-  scale_color_manual(values = c("Man" = "blue", "Woman" = "red"))+
-  labs(title = "Purchasing Power Parity Salary by Industry",
-       subtitle = "Split by Gender",
-       y= "Industry",
-       x= "Purchasing Power Parity related Salary",
-       colour= "Gender")+
-  xlim(0, 500000) 
+## a. Purchasing Power Parity adjusted Salary 
 
-```
-We look at the purchasing power parity salary to have a ground for comparison when looking at all countries, as a $1 in one country is not worth as much in another. 
-The industry with the most respondents, Computing/Tech, seems to be heavily male-dominated, especially when looking at the higher salaries. 
-```{r average gender gap}
-
-# Average gender gap in the US by industry
-
-plot1<-ppp_data_clean%>%
-  select(gender,industry,ppp_salary,country)%>%
- filter(gender!="Non-binary")%>%
- filter(gender!="Other or prefer not to answer")%>%
- filter(gender!="Prefer not to answer")%>%
- filter(country =="USA")
-
-plot2<-plot1%>%  
- group_by(industry,gender)%>%
- summarise(mean=mean(ppp_salary))
-
-plot1man<-plot2%>% 
-  filter(gender =="Man")
-
-plot2woman<-plot2%>%
-  filter(gender =="Woman")
-
-plot<-left_join(plot1man,plot2woman,by = "industry")%>%
-  mutate(gap=mean.x-mean.y)
-
-plot%>%
-  ggplot(aes(x=gap,y=reorder(industry, gap),group=1,fill = gap))+
-  geom_bar(stat='identity')+
-  labs(title = "Average gender gap in the US by industry",
-       subtitle = "Woman / Man",
-       x="$",
-       y= "industry")+
-  theme_bw()
-  
-```
-
-```{r}
-# Average Salary in the US by industry
-
-plot3<-plot1%>%
-  select(industry,ppp_salary)%>%
-group_by(industry)%>%
-summarise(mean1=mean(ppp_salary))
-  
-  plot3%>%
-  ggplot(aes(x=mean1,y=reorder(industry, mean1),group=1,fill = mean1))+
-  geom_histogram(stat='identity')+
-  labs(title = "Average Salary in the US by industry",
-       x="$",
-       y= "industry")+
-   theme(axis.text=element_text(size=8),
-        axis.title=element_text(size=10),
-        axis.text.x = element_blank()) +
-    theme_bw()
-  
-```
-
-```{r}
-# Average Salary in the US by educational level
-
-plot4<-ppp_data_clean%>%
-  drop_na(highest_level_of_education_completed)%>%
-  drop_na(USD_exchange)%>%
-  select(highest_level_of_education_completed,USD_exchange,country)%>%
-  filter(country=="USA")%>%
-  group_by(highest_level_of_education_completed)%>%
-  summarise(mean2=mean(USD_exchange))
-
-plot4 %>%
-  ggplot(aes(x=mean2,y=reorder(highest_level_of_education_completed, mean2),group=1,fill=mean2))+
-  geom_bar(stat='identity')+
-  labs(title = "Average Salary in the US by educational level",
-       x="$",
-       y= "educational level")+
-   theme(axis.text=element_text(size=8),
-        axis.title=element_text(size=10))+
-  theme_bw()
-
-
-```
-
+### Purchasing Power Parity adjusted Salary by Industry
 
 ```{r}
 
@@ -301,9 +253,9 @@ plot7%>%
   geom_point()+
   geom_smooth(method=lm)+
   scale_y_continuous(labels = dollar)+
-  labs(title = "Average ppp_salary distribution by industry and country",
+  labs(title = "Average PPP Salary Distribution by Industry and Country",
        x="Country",
-       y= "Average ppp_salary")+
+       y= "Average PPP Salary (US $)")+
    theme(axis.text=element_text(size=8),
         axis.title=element_text(size=10))+
   theme_bw()
@@ -313,53 +265,164 @@ plot7%>%
     ggplot(aes(x=reorder(country, gdp),y=mean3,group=1,color=industry))+
   #geom_point()+
   geom_smooth(method = lm)+
-  labs(title = "Average ppp_salary distribution by industry and country",
+  labs(title = "Average PPP Salary Distribution by Industry and Country - smooth line only",
        x="Country",
-       y= "Average ppp_salary")+
+       y= "Average PPP Salary (US $)")+
    theme(axis.text=element_text(size=8),
         axis.title=element_text(size=10))+
   theme_bw()
 
 
 ```
-
+On average, salaries worldwide fluctuate between $63,000 and $85,000, with Switzerland, Ireland and the USA having the highest average purchasing power adjusted salaries and India, South Africa and Spain having the lowest. 
 
 ```{r}
-ppp_data_clean %>%
+ppp_data_clean %>% 
+  group_by(industry) %>% 
   ggplot(aes(x=ppp_salary,y=industry,color=gender))+
-  geom_point()+
+  # facet_wrap(gender~.)+
+  geom_point(alpha=0.2)+
   scale_color_manual(values = c("Man" = "blue", "Woman" = "red"))+
-  xlim(0, 500000)+
-  theme_bw()+
-  labs(title = "Average ppp_salary distribution by gender and industry",
-       x="ppp_salary",
-       y= "Industry")
-
+  labs(title = "Purchasing Power Parity adjusted Salary by Industry",
+       subtitle = "Split by Gender",
+       y= "Industry",
+       x= "PPP adjusted Salary",
+       colour= "Gender")+
+  xlim(0, 500000) 
 
 ```
+Looking at the PPP adjusted salary for each industry, split by gender, seems to indicate a salary gap between genders, with men having higher salaries than woman in most industries. For instance, the industry with the most observations - Tech - seems to be overall heavily men-dominated, especially when looking at the right-hand side of the figure indicating that they also have higher salaries. This is not a surprising finding as studies show that there is less women then men in STEM, as there is a known "STEM gap" and social bias discourage women for pursuing careers in this field. 
+We will investigate the gender gap in each industry for the United States in the next portion of our analysis.
 
-We will now clean our race column. If we run a the `unique` function in r on the race column we see that there are 44 different categories. We will separate the race into white, non white and unanswered.
+## b. Focus on the United States  
 
-We then take out the Not Answered values as can be seen in the code below. 
+### Average salary in the US by Industry
 
 ```{r}
+# Average Salary in the US by industry
 
-ppp_data_final_clean <- ppp_data_clean %>%
-  drop_na(race, USD_exchange, highest_level_of_education_completed) %>% 
-  mutate(
-    race_filtered = case_when(
-    str_detect(race, "^Whitea*") ~ "White",
-    str_detect(race, "Another option not listed here or prefer not to answer*") ~ "Not Answered",
-    TRUE ~ "Non White"
-    )
-  ) %>% 
-  filter(!race_filtered=="Not Answered")
+plot3<-plot1%>%
+  select(industry,ppp_salary)%>%
+group_by(industry)%>%
+summarise(mean1=mean(ppp_salary))
+  
+  plot3%>%
+  ggplot(aes(x=mean1,y=reorder(industry, mean1),group=1,fill = mean1))+
+  geom_histogram(stat='identity')+
+  labs(title = "Average Salary in the US by Industry",
+       x="Average Salary (US $)",
+       y= "Industry",
+       fill= "Average")+
+   theme(axis.text=element_text(size=8),
+        axis.title=element_text(size=10),
+        axis.text.x = element_blank()) +
+    theme_bw()
+  
+```
+The United States highest paying industries are the ones we would assume, with Tech, Law and Sales having the highest salaries. Those industries having a reputation of being male-dominated - especially tech and sales - in the United States, it will be interesting to investigate the gender differences in salaries. 
 
+### Gender Gaps in the US 
+
+```{r average gender gap}
+
+# Average gender gap in the US by industry
+
+plot1<-ppp_data_clean%>%
+  select(gender,industry,ppp_salary,country)%>%
+ filter(gender!="Non-binary")%>%
+ filter(gender!="Other or prefer not to answer")%>%
+ filter(gender!="Prefer not to answer")%>%
+ filter(country =="USA")
+
+plot2<-plot1%>%  
+ group_by(industry,gender)%>%
+ summarise(mean=mean(ppp_salary))
+
+plot1man<-plot2%>% 
+  filter(gender =="Man")
+
+plot2woman<-plot2%>%
+  filter(gender =="Woman")
+
+plot<-left_join(plot1man,plot2woman,by = "industry")%>%
+  mutate(gap=mean.x-mean.y)
+
+plot%>%
+  ggplot(aes(x=gap,y=reorder(industry, gap),group=1,fill = gap))+
+  geom_bar(stat='identity')+
+  labs(title = "Average Gender Gap in the US by Industry",
+       subtitle = "Woman / Man",
+       x="Gap (US $)",
+       y= "Industry",
+       fill = "Gap")+
+  theme_bw()
+  
+```
+The above figure confirms our inferences. Finance, Tech and Law present the biggest average pay gaps, of over $45,000. They are also industries having a higher average salary than others, as we saw in the precedent figure, which could partly explain why the difference is so significant. Another reason for these large gaps is that top executives in those companies are mostly men, and studies show that people tend to promote others similar to them, making it harder for women to "break the glass ceilling".
+
+### Race salary gaps in the US
+
+```{r average race gap}
+plot1r<-ppp_data_final_clean%>%
+  select(gender,industry,ppp_salary,country, race_filtered)%>%
+  filter(country =="USA")
+
+plot2r<-plot1r%>%  
+ group_by(industry,race_filtered)%>%
+ summarise(mean=mean(ppp_salary))
+
+plot1w<-plot2r%>% 
+  filter(race_filtered =="White")
+
+plot2nw<-plot2r%>%
+  filter(race_filtered =="Non White")
+
+plotr<-left_join(plot1w,plot2nw,by = "industry")%>%
+  mutate(gapr=mean.x-mean.y)
+
+plotr%>%
+  ggplot(aes(x=gapr,y=reorder(industry, gapr),group=1,fill = gapr))+
+  geom_bar(stat='identity')+
+  labs(title = "Average Salary Gap in the US by Industry",
+       subtitle = "Race",
+       x="Gap (US $)",
+       y= "Industry",
+       fill = "Gap")+
+  theme_bw()
+  
+```
+Based on our initial assumptions,  public statistics and known political climate, we would assume that the salary gap in the US would benefit white people and disadvantage "non-white" people. However, as there were over 44 different race entries in the dataset, which we simplified to "non-white" and "white", it looks as if people belonging to the stricly "white" category make less money on average than people who do not. This is not an extremely accurate conclusion as we would need to drill into a better classification of races to produce more relevant findings. Yet, this should be kept in mind when trying to predict salaries accurately with linear regression. 
+
+### Average salary in the US by education level
+
+```{r}
+# Average Salary in the US by educational level
+
+plot4<-ppp_data_clean%>%
+  drop_na(highest_level_of_education_completed)%>%
+  drop_na(USD_exchange)%>%
+  select(highest_level_of_education_completed,USD_exchange,country)%>%
+  filter(country=="USA")%>%
+  group_by(highest_level_of_education_completed)%>%
+  summarise(mean2=mean(USD_exchange))
+
+plot4 %>%
+  ggplot(aes(x=mean2,y=reorder(highest_level_of_education_completed, mean2),group=1,fill=mean2))+
+  geom_bar(stat='identity')+
+  labs(title = "Average Salary in the US by Education level",
+       x="Average Salary (US $)",
+       y= "Education Level",
+      fill = "Average")+
+   theme(axis.text=element_text(size=8),
+        axis.title=element_text(size=10))+
+  theme_bw()
 
 
 ```
+The US having especially high tuitions fees, we expected the salaries to justify the cost of studying; with professional degrees earning on average $10,000 than Americans with only a high school diploma, it seems that education level is an influencing factor on average salary in the United States.
 
-# Regression
+
+# 3. Regression
 
 For our regression analysis, we are aiming to predict the total salary (annual salary and  other monnetary compensation) for the USA,  as this country has the highest number of observations and we are attempting to achieve a higher model accuracy. 
 ```{r Regression}
@@ -398,4 +461,4 @@ All in all,  our simplistic model 1 is not very good at predicting total salary,
 
 Our models 2-5 consecutively add other variables to the model: years of experience in field, highest level of education completed, gender and overall years of professional experience. With each addition the R squared measure increases, indicating that our model is explaining more of the dependent variable total salary. While adding new variables, our model follows the same logic as described above. For years of experience in field all of the variables are statistically significant for our model while compared the baseline of 1 year or less. The salary increase goes up with the amount of years in industry. In model 3, highest level of education completed has the baseline of College education with all other variables being statistically significant, and  each degree at a lower level than college earning less and each degree at a higher level earning more than a college educated person average, while controlling for the other variable categories in our model. Model 4 has male as a baseline with woman being statistically significant, indicating that women earn on average 26779 dollars less than men while controlling for other variables. Model 5 also incorporates overall years of professional experience, for which only two variables are statistically significant, meaning that the category is not very good for explaining the differences in total salary. This is also supported by a comparison of th R squared measures for model 4 and 5 (seen in the table comparison of regression model results), as the R squared only increases from 19% to 19.1%. 
 
-Finally, we derive our final model 6 which incorporates years of experience in field, highest level of education completed, gender and overall years of professional experience and gender. This model achieves an R squared of 19.3%, showing that our model variables explain 19.3% of the dependent variable total salary. Race is deemed statistically significant at the 0.01 p-value, showing that white people on earn on average -12532.0 dollars less than people we have grouped as non-white. It is important to note that in our data cleaning process, race originally had 44 different input variables and grouping these to only 3 (white, non-white and prefer not to say) influences our prediction results. All in all, the standard error is 83870 dollars, showing that while our final linear regression model fits the data better than our initial model 1, on average the actual total salary still deviates from our regression line by a substantial amount. Hence, the R squared and residual standard errors indicate a limited explanatory power of our model and that it should be significantly improved by adding better explanatory variables. We hypothesise that looking at the state variable in the US would increase model accuracy, as people in wealthier states such as Los Angeles or New York earn on average more than in other states. The comparison of our 6 models and their number of observations, R squared values and statistically significant variables is given as the last table in our analysis.
+Finally, we derive our final model 6 which incorporates years of experience in field, highest level of education completed, gender and overall years of professional experience, gender and race. This model achieves an R squared of 19.3%, showing that our model variables explain 19.3% of the dependent variable total salary. Race is deemed statistically significant at the 0.01 p-value, showing that white people on earn on average -12532.0 dollars less than people we have grouped as non-white. It is important to note that in our data cleaning process, race originally had 44 different input variables and grouping these to only 3 (white, non-white and prefer not to say) influences our prediction results. All in all, the standard error is 83870 dollars, showing that while our final linear regression model fits the data better than our initial model 1, on average the actual total salary still deviates from our regression line by a substantial amount of 83870 dollars. Hence, the R squared and residual standard errors indicate a limited explanatory power of our model and that it should be significantly improved by adding better explanatory variables. We hypothesise that looking at the state variable in the US would increase model accuracy, as people in wealthier states such as Los Angeles or New York earn on average more than in other states. The comparison of our 6 models and their number of observations, R squared values and statistically significant variables is given as the last table in our analysis.
