@@ -15,7 +15,7 @@ library(ggfortify)
 ```
 
 
-```{r }
+```{r}
 
 # use googlesheets4 to get data
 
@@ -65,6 +65,7 @@ clean_data3 <- clean_data2 %>%
    values[to]/(values[from]/x)
  }
 
+
 ## apply the function and create a new column
 clean_data4 <- clean_data3 %>% 
   mutate(USD_exchange = currencyCon(clean_data3$total_salary, clean_data3$currency, "USD"))
@@ -78,14 +79,13 @@ clean_data5 <- clean_data4 %>%
 
 
 ```{r pressure, echo=FALSE}
+
+
 clean_data <- clean_data5 %>% 
   filter(gender!="Non-binary")%>%
  filter(gender!="Other or prefer not to answer")%>%
   filter(gender!="Prefer not to answer")
-  
-mean_clean <- clean_data %>% 
-  group_by(gender, industry)%>%
-  summarise(mean1=mean(USD_exchange))
+
 
 ```
 
@@ -101,7 +101,8 @@ ppp_data3<-ppp_data2[!(ppp_data2$LOCATION=="EU27_2020" | ppp_data2$LOCATION=="EA
 ```
 
 ```{r left join}
-ppp_data4 <- ppp_data3 %>% select(LOCATION, Value)
+ppp_data4 <- ppp_data3 %>% 
+  select(LOCATION, Value)
 merge_data <- left_join(clean_data, ppp_data4, by = c('country' = 'LOCATION'))
 
 ppp_data<- merge_data %>% 
@@ -118,41 +119,38 @@ ppp_data<- merge_data %>%
 
 ```{r}
 library(stringr)
-# 
-# filter(ppp_data, str_detect(industry, "Pharmaa*"))
-# ppp_data %>% 
-#   filter(str_detect(industry,"profa*")) 
 
-# str_view(ppp_data$industry,"^Edua*")
-
-ppp_data5 <- ppp_data %>%
-  mutate(
-    industry = case_when(
-     str_detect(ppp_data$industry, "^Acaa*") ~ "Academia",
-     str_detect(ppp_data$industry, "pharmaa*") ~ "Pharmaceuticals",
-     str_detect(ppp_data$industry, "Pharmaa*") ~ "Pharmaceuticals",
-     str_detect(ppp_data$industry, "^Accounta*") ~ "Accounting, Banking & Finance",
-    str_detect(ppp_data$industry, "profa*") ~ "Nonprofits",
-    TRUE ~ industry
-    )
-  )
+# ppp_data5 <- ppp_data %>%
+#   mutate(
+#     industry = case_when(
+#      str_detect(ppp_data$industry, "^Acaa*") ~ "Academia",
+#      str_detect(ppp_data$industry, "pharmaa*") ~ "Pharmaceuticals",
+#      str_detect(ppp_data$industry, "Pharmaa*") ~ "Pharmaceuticals",
+#      str_detect(ppp_data$industry, "^Accounta*") ~ "Accounting, Banking & Finance",
+#     str_detect(ppp_data$industry, "profa*") ~ "Nonprofits",
+#     TRUE ~ industry
+#     )
+#   )
 
 
 ppp_data_industry <-  ppp_data5 %>% 
   count(industry,sort=TRUE) %>% 
   mutate(percent=100* n/sum(n)) %>% 
-  filter(percent>1)
+  filter(percent>0.8)
 
 ppp_industry <- ppp_data_industry$industry
 
 ppp_data_clean <- ppp_data %>% 
   filter(industry %in% ppp_industry)
+
+count <- ppp_data %>% 
+  group_by(industry) %>% 
+  summarise(count = n()) %>% 
+  arrange(-count)
+
 ```
 
 
-
-
-# Plot
 
 To begin with our analysis, we will look at the number of responses with the 
 
